@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sadgu Minimal App</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Sadgu App</h1>
+    </header>
+
+    <main id="home-page" class="page active">
+      <h2>Home</h2>
+      <p class="subtitle">Index par click karein aur section par seedha jayein.</p>
+      <nav id="index-list" class="card-list"></nav>
+
+      <button id="open-cbt" class="primary-btn">CBT Rankings</button>
+      <button id="open-chat" class="secondary-btn">New Chat</button>
+    </main>
+
+    <section id="content-page" class="page">
+      <button class="back-btn" data-target="home-page">← Back</button>
+      <article id="content-article" class="card"></article>
+    </section>
+
+    <section id="cbt-page" class="page">
+      <button class="back-btn" data-target="home-page">← Back</button>
+      <h2>CBT Ranking</h2>
+      <div id="cbt-list" class="card-list"></div>
+      <div id="chart-area" class="card"></div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
