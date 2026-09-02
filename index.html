@@ -3,35 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sadgu Minimal App</title>
+    <meta name="theme-color" content="#f5f2ea" />
+    <title>Memory Place — a visual space for your thoughts</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <h1>Sadgu App</h1>
-    </header>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Memory Place navigation">
+        <a class="brand" href="#" aria-label="Memory Place home"><span class="brand-mark">M</span><span>Memory Place</span></a>
+        <nav>
+          <button class="nav-item active" data-filter="all"><span class="nav-icon">⌂</span> My place</button>
+          <button class="nav-item" data-filter="favorites"><span class="nav-icon">♡</span> Favorites</button>
+          <p class="nav-label">Spaces</p>
+          <button class="nav-item" data-filter="ideas"><span class="dot clay"></span> Ideas</button>
+          <button class="nav-item" data-filter="inspiration"><span class="dot blue"></span> Inspiration</button>
+          <button class="nav-item" data-filter="remember"><span class="dot green"></span> To remember</button>
+        </nav>
+        <div class="sidebar-foot">
+          <div class="storage-copy"><span>Memory</span><span>24%</span></div>
+          <div class="storage"><i></i></div>
+          <p>12 of 50 memories</p>
+          <button class="user"><span class="avatar">A</span><span><b>Alex's place</b><small>Personal space</small></span><span>···</span></button>
+        </div>
+      </aside>
 
-    <main id="home-page" class="page active">
-      <h2>Home</h2>
-      <p class="subtitle">Index par click karein aur section par seedha jayein.</p>
-      <nav id="index-list" class="card-list"></nav>
+      <main>
+        <header class="topbar">
+          <button class="mobile-menu" aria-label="Open menu">☰</button>
+          <div class="view-switch" aria-label="Choose view">
+            <button class="view-btn active" data-view="perspective" title="Room view">◫</button>
+            <button class="view-btn" data-view="top" title="Top view">⌗</button>
+          </div>
+          <div class="top-actions">
+            <button class="icon-button" id="sound-toggle" aria-label="Toggle ambient sound">◖</button>
+            <button class="share-button">↗ <span>Share place</span></button>
+          </div>
+        </header>
 
-      <button id="open-cbt" class="primary-btn">CBT Rankings</button>
-      <button id="open-chat" class="secondary-btn">New Chat</button>
-    </main>
+        <section class="hero">
+          <p class="eyebrow">Wednesday, September 2</p>
+          <h1>A place for what<br /><em>matters to you.</em></h1>
+          <p class="intro">Gather ideas, images and moments in a quiet space of your own.</p>
+        </section>
 
-    <section id="content-page" class="page">
-      <button class="back-btn" data-target="home-page">← Back</button>
-      <article id="content-article" class="card"></article>
-    </section>
+        <section class="memory-room" id="memory-room" aria-label="Your memory room">
+          <div class="room-wall"><div class="sun-glow"></div><div class="wall-line one"></div><div class="wall-line two"></div></div>
+          <div class="room-floor"></div>
 
-    <section id="cbt-page" class="page">
-      <button class="back-btn" data-target="home-page">← Back</button>
-      <h2>CBT Ranking</h2>
-      <div id="cbt-list" class="card-list"></div>
-      <div id="chart-area" class="card"></div>
-    </section>
+          <article class="memory-card card-tall" data-space="inspiration" tabindex="0">
+            <button class="heart" aria-label="Favorite this memory">♡</button>
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=85" alt="Sunlight filtering through a quiet forest" />
+            <div class="card-note"><p>Walk slowly.<br />Notice everything.</p><small>INSPIRATION</small></div>
+          </article>
 
+          <article class="memory-card card-wide" data-space="ideas" tabindex="0">
+            <button class="heart" aria-label="Favorite this memory">♡</button>
+            <img src="https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=800&q=85" alt="Modern warm concrete architecture" />
+            <div class="card-note"><p>Spaces that let<br />the light in.</p><small>IDEAS</small></div>
+          </article>
+
+          <article class="memory-card card-small" data-space="remember" tabindex="0">
+            <button class="heart active" aria-label="Remove from favorites">♥</button>
+            <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd4297?auto=format&fit=crop&w=600&q=85" alt="Distant road through a golden landscape" />
+            <div class="card-note"><p>There is time.</p><small>TO REMEMBER</small></div>
+          </article>
+
+          <div class="room-object plant" aria-hidden="true"><i></i><i></i><i></i><i></i><span></span></div>
+          <div class="room-object bench" aria-hidden="true"><span></span><i></i><i></i></div>
+          <div class="room-object rug" aria-hidden="true"></div>
+          <button class="add-memory" id="add-memory"><b>＋</b><span>Add a memory</span></button>
+        </section>
+
+        <footer class="prompt-dock">
+          <form id="memory-form">
+            <button type="button" class="attach" aria-label="Attach an image">＋</button>
+            <label class="sr-only" for="memory-prompt">Describe a memory to create</label>
+            <input id="memory-prompt" autocomplete="off" placeholder="What would you like to remember?" />
+            <button class="create-button" type="submit"><span>Create memory</span> ↑</button>
+          </form>
+          <p>Describe it in your own words. Your place will bring it to life.</p>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="memory-dialog">
+      <button class="close-dialog" aria-label="Close">×</button>
+      <p class="eyebrow">New memory</p>
+      <h2>What should this place hold?</h2>
+      <form id="dialog-form">
+        <textarea id="dialog-prompt" placeholder="A quiet cabin by the lake at first light…" required></textarea>
+        <div class="chips"><button type="button">An idea</button><button type="button">Inspiration</button><button type="button">A reminder</button></div>
+        <button class="dialog-create" type="submit">Create memory <span>↑</span></button>
+      </form>
+    </dialog>
+    <div class="toast" role="status" aria-live="polite"></div>
     <script src="app.js"></script>
   </body>
 </html>

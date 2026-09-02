@@ -1,98 +1,104 @@
-const sections = [
-  {
-    title: "Index 1: Dhyan",
-    content:
-      "Yeh section dhyan ki basic practice ke liye hai. Roz 10 minute saans par dhyan dene ki aadat banayein.",
-  },
-  {
-    title: "Index 2: Anand",
-    content:
-      "Is section mein anand ko andar se develop karne ke simple points hain: gratitude, silence, mindful living.",
-  },
-  {
-    title: "Index 3: Jeevan",
-    content:
-      "Yeh section daily life balance par hai: sehat, samay aur emotional clarity ke saath jeena.",
-  },
+const room = document.querySelector("#memory-room");
+const dialog = document.querySelector("#memory-dialog");
+const toast = document.querySelector(".toast");
+const promptInput = document.querySelector("#memory-prompt");
+let selectedSpace = "ideas";
+
+const imageLibrary = [
+  { words: ["sea", "ocean", "beach", "water"], url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=85" },
+  { words: ["mountain", "hike", "snow"], url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=85" },
+  { words: ["home", "room", "cabin", "house"], url: "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=700&q=85" },
+  { words: ["flower", "garden", "spring"], url: "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=700&q=85" },
+  { words: ["city", "travel", "street"], url: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=700&q=85" },
+  { words: [], url: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=700&q=85" },
 ];
 
-const cbtRecords = [
-  { name: "CBT Alpha", score: 92, metrics: { Focus: 90, Calm: 95, Clarity: 88 } },
-  { name: "CBT Beta", score: 85, metrics: { Focus: 80, Calm: 88, Clarity: 86 } },
-  { name: "CBT Gamma", score: 78, metrics: { Focus: 75, Calm: 80, Clarity: 79 } },
-];
-
-const pages = document.querySelectorAll(".page");
-
-function showPage(id) {
-  pages.forEach((page) => page.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove("show"), 2400);
 }
 
-function renderIndexes() {
-  const list = document.getElementById("index-list");
-  list.innerHTML = "";
+document.querySelectorAll(".view-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".view-btn").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    room.classList.toggle("top-view", button.dataset.view === "top");
+  });
+});
 
-  sections.forEach((section) => {
-    const button = document.createElement("button");
-    button.className = "index-item";
-    button.textContent = section.title;
-    button.addEventListener("click", () => {
-      const article = document.getElementById("content-article");
-      article.innerHTML = `<h3>${section.title}</h3><p>${section.content}</p>`;
-      showPage("content-page");
+document.querySelectorAll(".nav-item").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    document.querySelectorAll(".memory-card").forEach((card) => {
+      const show = button.dataset.filter === "all" || card.dataset.space === button.dataset.filter || (button.dataset.filter === "favorites" && card.querySelector(".heart").classList.contains("active"));
+      card.classList.toggle("hidden", !show);
     });
-    list.appendChild(button);
+    document.querySelector(".sidebar").classList.remove("open");
   });
+});
+
+room.addEventListener("click", (event) => {
+  const heart = event.target.closest(".heart");
+  if (!heart) return;
+  heart.classList.toggle("active");
+  heart.textContent = heart.classList.contains("active") ? "♥" : "♡";
+  heart.setAttribute("aria-label", heart.classList.contains("active") ? "Remove from favorites" : "Favorite this memory");
+});
+
+function openDialog(text = "") {
+  document.querySelector("#dialog-prompt").value = text;
+  dialog.showModal();
+  setTimeout(() => document.querySelector("#dialog-prompt").focus(), 50);
 }
 
-function renderCBTList() {
-  const list = document.getElementById("cbt-list");
-  const sorted = [...cbtRecords].sort((a, b) => b.score - a.score);
+document.querySelector("#add-memory").addEventListener("click", () => openDialog());
+document.querySelector(".attach").addEventListener("click", () => openDialog(promptInput.value));
+document.querySelector(".close-dialog").addEventListener("click", () => dialog.close());
+document.querySelector(".mobile-menu").addEventListener("click", () => document.querySelector(".sidebar").classList.toggle("open"));
 
-  list.innerHTML = "";
-  sorted.forEach((item, index) => {
-    const button = document.createElement("button");
-    button.className = "cbt-item";
-    button.innerHTML = `<strong>#${index + 1} ${item.name}</strong><br />Score: ${item.score}`;
-    button.addEventListener("click", () => renderChart(item));
-    list.appendChild(button);
-  });
+document.querySelectorAll(".chips button").forEach((chip) => chip.addEventListener("click", () => {
+  document.querySelectorAll(".chips button").forEach((item) => item.classList.remove("active"));
+  chip.classList.add("active");
+  selectedSpace = chip.textContent.includes("Inspiration") ? "inspiration" : chip.textContent.includes("reminder") ? "remember" : "ideas";
+}));
 
-  renderChart(sorted[0]);
+function createMemory(text) {
+  const lower = text.toLowerCase();
+  const match = imageLibrary.find((image) => image.words.some((word) => lower.includes(word))) || imageLibrary.at(-1);
+  const card = document.createElement("article");
+  card.className = "memory-card card-wide new-card";
+  card.dataset.space = selectedSpace;
+  card.tabIndex = 0;
+  card.style.left = `${28 + Math.random() * 30}%`;
+  card.style.top = `${35 + Math.random() * 45}px`;
+  card.innerHTML = `<button class="heart" aria-label="Favorite this memory">♡</button><img src="${match.url}" alt="Visual memory for ${text.replaceAll('"', "&quot;")}" /><div class="card-note"><p>${text}</p><small>${selectedSpace.toUpperCase()}</small></div>`;
+  room.appendChild(card);
+  showToast("Your memory has found its place.");
 }
 
-function renderChart(cbt) {
-  const chart = document.getElementById("chart-area");
-  const rows = Object.entries(cbt.metrics)
-    .map(
-      ([label, value]) => `
-      <div class="bar-row">
-        <div class="bar-label"><span>${label}</span><span>${value}%</span></div>
-        <div class="bar"><div class="bar-fill" style="width: ${value}%"></div></div>
-      </div>`
-    )
-    .join("");
+document.querySelector("#memory-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = promptInput.value.trim();
+  if (!text) return promptInput.focus();
+  createMemory(text);
+  promptInput.value = "";
+});
 
-  chart.innerHTML = `<h3>${cbt.name} Chart</h3>${rows}`;
-}
+document.querySelector("#dialog-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  createMemory(document.querySelector("#dialog-prompt").value.trim());
+  dialog.close();
+});
 
-function setupNavigation() {
-  document.querySelectorAll(".back-btn").forEach((button) => {
-    button.addEventListener("click", () => showPage(button.dataset.target));
-  });
+document.querySelector("#sound-toggle").addEventListener("click", (event) => {
+  event.currentTarget.classList.toggle("active");
+  showToast(event.currentTarget.classList.contains("active") ? "Ambient sound on" : "Ambient sound off");
+});
 
-  document.getElementById("open-cbt").addEventListener("click", () => {
-    renderCBTList();
-    showPage("cbt-page");
-  });
-
-  document.getElementById("open-chat").addEventListener("click", () => {
-    const chatUrl =
-      "https://chatgpt.com/g/g-p-69e06daa45d88191a6cc9b2eb394a91e-sadguru/c/69e06e1e-1be0-83a5-a23c-10f6ccd71e15";
-    window.open(chatUrl, "_blank");
-  });
-}
-
-renderIndexes();
-setupNavigation();
+document.querySelector(".share-button").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(location.href); showToast("Place link copied."); }
+  catch { showToast("Your place is ready to share."); }
+});
