@@ -1,98 +1,124 @@
-const sections = [
-  {
-    title: "Index 1: Dhyan",
-    content:
-      "Yeh section dhyan ki basic practice ke liye hai. Roz 10 minute saans par dhyan dene ki aadat banayein.",
-  },
-  {
-    title: "Index 2: Anand",
-    content:
-      "Is section mein anand ko andar se develop karne ke simple points hain: gratitude, silence, mindful living.",
-  },
-  {
-    title: "Index 3: Jeevan",
-    content:
-      "Yeh section daily life balance par hai: sehat, samay aur emotional clarity ke saath jeena.",
-  },
-];
+const input = document.querySelector("#prompt-input");
+const form = document.querySelector("#prompt-form");
+const diagram = document.querySelector("#diagram");
+const grid = document.querySelector("#diagram-grid");
+const emptyState = document.querySelector("#empty-state");
+const historyEl = document.querySelector("#history");
+const titleEl = document.querySelector("#flow-title");
+const toast = document.querySelector("#toast");
+let zoom = 1;
 
-const cbtRecords = [
-  { name: "CBT Alpha", score: 92, metrics: { Focus: 90, Calm: 95, Clarity: 88 } },
-  { name: "CBT Beta", score: 85, metrics: { Focus: 80, Calm: 88, Clarity: 86 } },
-  { name: "CBT Gamma", score: 78, metrics: { Focus: 75, Calm: 80, Clarity: 79 } },
-];
-
-const pages = document.querySelectorAll(".page");
-
-function showPage(id) {
-  pages.forEach((page) => page.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+function escapeHtml(value) {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+  })[character]);
 }
 
-function renderIndexes() {
-  const list = document.getElementById("index-list");
-  list.innerHTML = "";
+const iconPaths = {
+  start: '<circle cx="12" cy="12" r="7"/><path d="m10 9 5 3-5 3Z"/>',
+  idea: '<path d="M9 18h6M10 22h4"/><path d="M8.2 15.1A7 7 0 1 1 15.8 15c-1.1.8-1.3 1.7-1.3 2h-5c0-.4-.2-1.2-1.3-1.9Z"/>',
+  data: '<ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+  people: '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 2.7-6 6-6s6 2 6 6M15 15c3 0 5 1.7 5 5"/>',
+  process: '<path d="M4 7h12M13 4l3 3-3 3M20 17H8M11 14l-3 3 3 3"/>',
+  shield: '<path d="M12 3 5 6v5c0 4.8 2.9 8.1 7 10 4.1-1.9 7-5.2 7-10V6Z"/><path d="m9 12 2 2 4-4"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/>',
+  finish: '<path d="m5 12 4 4L19 6"/>',
+};
 
-  sections.forEach((section) => {
-    const button = document.createElement("button");
-    button.className = "index-item";
-    button.textContent = section.title;
-    button.addEventListener("click", () => {
-      const article = document.getElementById("content-article");
-      article.innerHTML = `<h3>${section.title}</h3><p>${section.content}</p>`;
-      showPage("content-page");
-    });
-    list.appendChild(button);
-  });
+function pickIcon(text, index) {
+  const word = text.toLowerCase();
+  if (/internet|web|world|network/.test(word)) return "globe";
+  if (/user|people|team|customer/.test(word)) return "people";
+  if (/data|store|database|memory/.test(word)) return "data";
+  if (/safe|secure|protect/.test(word)) return "shield";
+  if (/idea|think|plan|light/.test(word)) return "idea";
+  return index === 0 ? "start" : index === 3 ? "finish" : "process";
 }
 
-function renderCBTList() {
-  const list = document.getElementById("cbt-list");
-  const sorted = [...cbtRecords].sort((a, b) => b.score - a.score);
+const explainers = {
+  internet: [
+    ["Your device", "You enter a request in your browser."],
+    ["Find the address", "DNS translates the website name into an IP address."],
+    ["Travel the network", "Small data packets move through routers and cables."],
+    ["Server responds", "The server sends the requested page back to your screen."],
+  ],
+  photosynthesis: [
+    ["Sunlight arrives", "Leaves capture energy from the sun."],
+    ["Roots gather", "Water travels from the soil up through the plant."],
+    ["Leaves combine", "Carbon dioxide and water become sugar using light."],
+    ["Energy & oxygen", "Sugar fuels the plant while oxygen is released."],
+  ],
+  launch: [
+    ["Define the goal", "Choose the audience, problem, and outcome."],
+    ["Build the story", "Shape your message and product experience."],
+    ["Reach people", "Coordinate content, channels, and your launch team."],
+    ["Learn & improve", "Measure response, gather feedback, and iterate."],
+  ],
+};
 
-  list.innerHTML = "";
-  sorted.forEach((item, index) => {
-    const button = document.createElement("button");
-    button.className = "cbt-item";
-    button.innerHTML = `<strong>#${index + 1} ${item.name}</strong><br />Score: ${item.score}`;
-    button.addEventListener("click", () => renderChart(item));
-    list.appendChild(button);
-  });
-
-  renderChart(sorted[0]);
+function generateSteps(prompt) {
+  const key = Object.keys(explainers).find((item) => prompt.toLowerCase().includes(item));
+  if (key) return explainers[key];
+  const subject = prompt.replace(/^(explain|how does|how do|what is|show me|describe)\s+/i, "").replace(/[?.!]$/, "");
+  return [
+    ["Begin", `Start with the core purpose of ${subject}.`],
+    ["Key inputs", "Identify the people, information, or resources involved."],
+    ["Main process", "The inputs move through a connected series of actions."],
+    ["Result", "The process produces an outcome you can observe and improve."],
+  ];
 }
 
-function renderChart(cbt) {
-  const chart = document.getElementById("chart-area");
-  const rows = Object.entries(cbt.metrics)
-    .map(
-      ([label, value]) => `
-      <div class="bar-row">
-        <div class="bar-label"><span>${label}</span><span>${value}%</span></div>
-        <div class="bar"><div class="bar-fill" style="width: ${value}%"></div></div>
-      </div>`
-    )
-    .join("");
-
-  chart.innerHTML = `<h3>${cbt.name} Chart</h3>${rows}`;
+function iconSvg(name) {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${iconPaths[name]}</svg>`;
 }
 
-function setupNavigation() {
-  document.querySelectorAll(".back-btn").forEach((button) => {
-    button.addEventListener("click", () => showPage(button.dataset.target));
-  });
-
-  document.getElementById("open-cbt").addEventListener("click", () => {
-    renderCBTList();
-    showPage("cbt-page");
-  });
-
-  document.getElementById("open-chat").addEventListener("click", () => {
-    const chatUrl =
-      "https://chatgpt.com/g/g-p-69e06daa45d88191a6cc9b2eb394a91e-sadguru/c/69e06e1e-1be0-83a5-a23c-10f6ccd71e15";
-    window.open(chatUrl, "_blank");
-  });
+function drawConnectors() {
+  const svg = document.querySelector("#connectors");
+  const nodes = [...grid.querySelectorAll(".node")];
+  if (!nodes.length) return;
+  const diagramRect = diagram.getBoundingClientRect();
+  svg.innerHTML = nodes.slice(0, -1).map((node, i) => {
+    const a = node.getBoundingClientRect(); const b = nodes[i + 1].getBoundingClientRect();
+    const x1 = (a.right - diagramRect.left) / zoom; const y1 = (a.top + a.height / 2 - diagramRect.top) / zoom;
+    const x2 = (b.left - diagramRect.left) / zoom; const y2 = (b.top + b.height / 2 - diagramRect.top) / zoom;
+    return `<path class="connector" d="M ${x1} ${y1} C ${x1 + 25} ${y1}, ${x2 - 25} ${y2}, ${x2} ${y2}"/>`;
+  }).join("");
 }
 
-renderIndexes();
-setupNavigation();
+function saveHistory(prompt) {
+  const history = JSON.parse(localStorage.getItem("flowly-history") || "[]");
+  const next = [prompt, ...history.filter((item) => item !== prompt)].slice(0, 6);
+  localStorage.setItem("flowly-history", JSON.stringify(next)); renderHistory();
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem("flowly-history") || "[]");
+  historyEl.innerHTML = history.length ? history.map((item, i) => `<button class="${i === 0 ? "active" : ""}" data-prompt="${escapeHtml(item)}">${escapeHtml(item)}</button>`).join("") : '<button disabled>No explanations yet</button>';
+  historyEl.querySelectorAll("[data-prompt]").forEach((button) => button.addEventListener("click", () => createFlow(button.dataset.prompt)));
+}
+
+function createFlow(prompt, save = true) {
+  if (!prompt.trim()) return;
+  const button = document.querySelector("#generate-button"); button.classList.add("loading"); button.querySelector("span").textContent = "Thinking…";
+  setTimeout(() => {
+    const steps = generateSteps(prompt);
+    grid.innerHTML = `<div class="flow-heading"><span class="tag">Visual explanation</span><h2>${escapeHtml(prompt)}</h2><p>A simple, step-by-step view</p></div>` + steps.map(([name, copy], i) => `<article class="node" style="animation-delay:${i * 100}ms"><div class="node-icon">${iconSvg(pickIcon(`${name} ${copy}`, i))}</div><span class="node-index">STEP 0${i + 1}</span><h3>${escapeHtml(name)}</h3><p>${escapeHtml(copy)}</p></article>`).join("");
+    emptyState.hidden = true; diagram.hidden = false; titleEl.textContent = prompt.length > 42 ? `${prompt.slice(0, 42)}…` : prompt; input.value = ""; input.style.height = "auto";
+    button.classList.remove("loading"); button.querySelector("span").textContent = "Generate"; if (save) saveHistory(prompt);
+    requestAnimationFrame(drawConnectors);
+  }, 620);
+}
+
+form.addEventListener("submit", (event) => { event.preventDefault(); createFlow(input.value); });
+input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = `${input.scrollHeight}px`; });
+input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
+document.querySelectorAll("#suggestions button").forEach((button) => button.addEventListener("click", () => createFlow(button.textContent)));
+document.querySelector("#new-flow").addEventListener("click", () => { diagram.hidden = true; emptyState.hidden = false; titleEl.textContent = "Untitled explanation"; input.focus(); document.querySelector("#sidebar").classList.remove("open"); });
+document.querySelector("#menu-button").addEventListener("click", () => document.querySelector("#sidebar").classList.toggle("open"));
+document.querySelector("#theme-toggle").addEventListener("click", () => document.body.classList.toggle("dark"));
+document.querySelector("#reset-view").addEventListener("click", () => setZoom(1));
+function setZoom(value) { zoom = Math.max(.7, Math.min(1.3, value)); diagram.style.transform = `scale(${zoom})`; document.querySelector("#zoom-value").textContent = `${Math.round(zoom * 100)}%`; requestAnimationFrame(drawConnectors); }
+document.querySelector("#zoom-in").addEventListener("click", () => setZoom(zoom + .1));
+document.querySelector("#zoom-out").addEventListener("click", () => setZoom(zoom - .1));
+document.querySelector("#export-button").addEventListener("click", () => { navigator.clipboard?.writeText(grid.innerText); toast.textContent = "Explanation copied to clipboard"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2000); });
+window.addEventListener("resize", drawConnectors); renderHistory();

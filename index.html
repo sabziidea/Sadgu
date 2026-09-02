@@ -3,35 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sadgu Minimal App</title>
+    <meta name="description" content="Flowly turns a short prompt into a clear, animated visual explanation." />
+    <title>Flowly — Explain anything visually</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <h1>Sadgu App</h1>
-    </header>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="Flowly home">
+          <span class="brand-mark">F</span><span>flowly</span>
+        </a>
+        <button class="new-flow" id="new-flow" type="button"><span>＋</span> New explanation</button>
+        <div class="sidebar-label">Recent</div>
+        <nav class="history" id="history" aria-label="Recent explanations"></nav>
+        <div class="sidebar-bottom">
+          <div class="local-badge"><span class="status-dot"></span><span><strong>Local workspace</strong><small>Your data stays here</small></span></div>
+          <button class="icon-button" id="theme-toggle" type="button" aria-label="Toggle color theme">☼</button>
+        </div>
+      </aside>
 
-    <main id="home-page" class="page active">
-      <h2>Home</h2>
-      <p class="subtitle">Index par click karein aur section par seedha jayein.</p>
-      <nav id="index-list" class="card-list"></nav>
+      <main class="workspace">
+        <header class="topbar">
+          <button class="menu-button" id="menu-button" type="button" aria-label="Open menu">☰</button>
+          <div class="document-title"><span id="flow-title">Untitled explanation</span><span class="saved-state">Saved locally</span></div>
+          <div class="top-actions">
+            <button class="quiet-button" id="reset-view" type="button">Reset view</button>
+            <button class="export-button" id="export-button" type="button">Export <span>↗</span></button>
+          </div>
+        </header>
 
-      <button id="open-cbt" class="primary-btn">CBT Rankings</button>
-      <button id="open-chat" class="secondary-btn">New Chat</button>
-    </main>
+        <section class="canvas-wrap" id="canvas-wrap" aria-label="Visual explanation canvas">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-graphic" aria-hidden="true">
+              <span class="mini-node mini-one">✦</span><span class="mini-line"></span><span class="mini-node mini-two">✓</span>
+            </div>
+            <p class="eyebrow">YOUR VISUAL THINKING SPACE</p>
+            <h1>What should we<br /><em>make clear?</em></h1>
+            <p class="intro">Describe a concept, process, or system. Flowly will turn it into a simple visual story.</p>
+            <div class="suggestions" id="suggestions">
+              <button type="button">How does the internet work?</button>
+              <button type="button">Explain photosynthesis</button>
+              <button type="button">Plan a product launch</button>
+            </div>
+          </div>
 
-    <section id="content-page" class="page">
-      <button class="back-btn" data-target="home-page">← Back</button>
-      <article id="content-article" class="card"></article>
-    </section>
+          <div class="diagram" id="diagram" hidden>
+            <svg class="connectors" id="connectors" aria-hidden="true"></svg>
+            <div class="diagram-grid" id="diagram-grid"></div>
+          </div>
 
-    <section id="cbt-page" class="page">
-      <button class="back-btn" data-target="home-page">← Back</button>
-      <h2>CBT Ranking</h2>
-      <div id="cbt-list" class="card-list"></div>
-      <div id="chart-area" class="card"></div>
-    </section>
+          <div class="zoom-controls" aria-label="Canvas zoom controls">
+            <button id="zoom-out" type="button" aria-label="Zoom out">−</button><span id="zoom-value">100%</span><button id="zoom-in" type="button" aria-label="Zoom in">＋</button>
+          </div>
+        </section>
 
+        <div class="composer-shell">
+          <form class="composer" id="prompt-form">
+            <textarea id="prompt-input" rows="1" maxlength="240" placeholder="Explain anything visually…" aria-label="What would you like explained?"></textarea>
+            <div class="composer-footer">
+              <span class="hint"><kbd>↵</kbd> to generate · <kbd>⇧ ↵</kbd> new line</span>
+              <button class="generate-button" id="generate-button" type="submit" aria-label="Generate explanation"><span>Generate</span> ↑</button>
+            </div>
+          </form>
+          <p class="privacy-note">No account. No cloud. Just your ideas, explained locally.</p>
+        </div>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
     <script src="app.js"></script>
   </body>
 </html>
