@@ -21,3 +21,7 @@ python3 -m http.server 4173
 Then open `http://127.0.0.1:4173` on the **same computer** where that command is running.
 
 No build step, account, API key, or external backend is required. Recent prompts are stored in the browser with `localStorage`.
+
+## Built-in demo
+
+Select **Watch a quick demo** on the welcome screen (or **Demo** in the header). Flowly will generate an internet explanation and animate through each step. You can also open `index.html?demo=1` to start the demo automatically.

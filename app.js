@@ -109,10 +109,24 @@ function createFlow(prompt, save = true) {
   }, 620);
 }
 
+function playDemo() {
+  createFlow("How does the internet work?", false);
+  setTimeout(() => {
+    const nodes = [...grid.querySelectorAll(".node")];
+    nodes.forEach((node, index) => setTimeout(() => {
+      nodes.forEach((item) => item.classList.remove("demo-highlight"));
+      node.classList.add("demo-highlight");
+    }, index * 700));
+    setTimeout(() => nodes.at(-1)?.classList.remove("demo-highlight"), nodes.length * 700 + 900);
+  }, 800);
+}
+
 form.addEventListener("submit", (event) => { event.preventDefault(); createFlow(input.value); });
 input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = `${input.scrollHeight}px`; });
 input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
 document.querySelectorAll("#suggestions button").forEach((button) => button.addEventListener("click", () => createFlow(button.textContent)));
+document.querySelector("#watch-demo").addEventListener("click", playDemo);
+document.querySelector("#demo-button").addEventListener("click", playDemo);
 document.querySelector("#new-flow").addEventListener("click", () => { diagram.hidden = true; emptyState.hidden = false; titleEl.textContent = "Untitled explanation"; input.focus(); document.querySelector("#sidebar").classList.remove("open"); });
 document.querySelector("#menu-button").addEventListener("click", () => document.querySelector("#sidebar").classList.toggle("open"));
 document.querySelector("#theme-toggle").addEventListener("click", () => document.body.classList.toggle("dark"));
@@ -122,3 +136,4 @@ document.querySelector("#zoom-in").addEventListener("click", () => setZoom(zoom 
 document.querySelector("#zoom-out").addEventListener("click", () => setZoom(zoom - .1));
 document.querySelector("#export-button").addEventListener("click", () => { navigator.clipboard?.writeText(grid.innerText); toast.textContent = "Explanation copied to clipboard"; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2000); });
 window.addEventListener("resize", drawConnectors); renderHistory();
+if (new URLSearchParams(window.location.search).has("demo")) playDemo();
